@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask React Minimal App</title>
+    <title>OpenCV Python Demo</title>
 </head>
 <body>
-    <div id="root"></div>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <h1>OpenCV Python Demo</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload and Process</button>
+    </form>
+
+    {% if image %}
+        <h2>Processed Image:</h2>
+        <img src="{{ image }}" alt="Processed Image">
+    {% endif %}
 </body>
 </html>
