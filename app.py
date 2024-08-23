@@ -7,6 +7,7 @@ app = Flask(__name__)
 # 配置上传文件夹
 UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+current_image = None
 
 @app.route('/')
 def index():
@@ -14,6 +15,7 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    global current_image
     if 'file' not in request.files:
         return redirect(request.url)
     file = request.files['file']
@@ -22,18 +24,34 @@ def upload():
     if file:
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
+        current_image = filepath
+        return render_template('index.html', image={'original': current_image, 'processed': current_image})
 
-        # 读取图像
-        image = cv2.imread(filepath)
+@app.route('/process', methods=['POST'])
+def process():
+    global current_image
+    if not current_image:
+        return redirect(url_for('index'))
 
-        # OpenCV处理, 例如转换为灰度图
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.imread(current_image)
+    process_type = request.form['processType']
 
-        # 保存处理后的图像
-        processed_filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'processed-' + file.filename)
-        cv2.imwrite(processed_filepath, gray_image)
+    if process_type == 'gray':
+        processed_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    elif process_type == 'crop':
+        width = int(request.form['width'])
+        height = int(request.form['height'])
+        processed_image = cv2.resize(image, (width, height))
+        processed_image = processed_image[0:height, 0:width]  # Simple crop to top-left
+    elif process_type == 'resize':
+        width = int(request.form['width'])
+        height = int(request.form['height'])
+        processed_image = cv2.resize(image, (width, height))
 
-        return render_template('index.html', image=processed_filepath)
+    processed_filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'processed-' + os.path.basename(current_image))
+    cv2.imwrite(processed_filepath, processed_image)
+
+    return render_template('index.html', image={'original': current_image, 'processed': processed_filepath})
 
 if __name__ == '__main__':
     app.run(debug=True)

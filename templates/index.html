@@ -4,17 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCV Python Demo</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+        #sidebar {
+            width: 30%;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        #content {
+            width: 70%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #content img {
+            max-width: 100%;
+            max-height: 80vh;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+        }
+    </style>
+    <script>
+        function showCropDialog() {
+            const width = prompt("Enter the target width:");
+            const height = prompt("Enter the target height:");
+            if (width && height) {
+                document.getElementById('width').value = width;
+                document.getElementById('height').value = height;
+                document.getElementById('processType').value = 'crop';
+                document.getElementById('processForm').submit();
+            }
+        }
+
+        function showResizeDialog() {
+            const width = prompt("Enter the target width:");
+            const height = prompt("Enter the target height:");
+            if (width && height) {
+                document.getElementById('width').value = width;
+                document.getElementById('height').value = height;
+                document.getElementById('processType').value = 'resize';
+                document.getElementById('processForm').submit();
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>OpenCV Python Demo</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Upload and Process</button>
-    </form>
+    <div id="sidebar">
+        <h1>操作栏</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <button type="submit">上传图片</button>
+        </form>
 
-    {% if image %}
-        <h2>Processed Image:</h2>
-        <img src="{{ image }}" alt="Processed Image">
-    {% endif %}
+        <h2>选择处理方式:</h2>
+        <form id="processForm" action="/process" method="post">
+            <input type="hidden" name="processType" id="processType">
+            <input type="hidden" name="width" id="width">
+            <input type="hidden" name="height" id="height">
+            <button type="button" onclick="document.getElementById('processType').value='gray'; document.getElementById('processForm').submit();">转换为灰度</button>
+            <button type="button" onclick="showCropDialog()">裁剪大小</button>
+            <button type="button" onclick="showResizeDialog()">缩放大小</button>
+        </form>
+    </div>
+
+    <div id="content">
+        <h2>原始图片</h2>
+        {% if image %}
+            <img src="{{ image.original }}" alt="Original Image">
+        {% endif %}
+        <h2>处理后的图片</h2>
+        {% if image %}
+            <img src="{{ image.processed }}" alt="Processed Image">
+        {% endif %}
+    </div>
 </body>
 </html>
