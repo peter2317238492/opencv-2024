@@ -53,6 +53,17 @@
                 document.getElementById('processForm').submit();
             }
         }
+
+        function showRotateDialog() {
+            const angle = prompt("Enter the rotation angle (90, 180, 270):");
+            if (angle === '90' || angle === '180' || angle === '270') {
+                document.getElementById('angle').value = angle;
+                document.getElementById('processType').value = 'rotate';
+                document.getElementById('processForm').submit();
+            } else {
+                alert("Please enter a valid angle: 90, 180, or 270.");
+            }
+        }
     </script>
 </head>
 <body>
@@ -68,9 +79,13 @@
             <input type="hidden" name="processType" id="processType">
             <input type="hidden" name="width" id="width">
             <input type="hidden" name="height" id="height">
+            <input type="hidden" name="angle" id="angle">
             <button type="button" onclick="document.getElementById('processType').value='gray'; document.getElementById('processForm').submit();">转换为灰度</button>
             <button type="button" onclick="showCropDialog()">裁剪大小</button>
             <button type="button" onclick="showResizeDialog()">缩放大小</button>
+            <button type="button" onclick="showRotateDialog()">旋转图片</button>
+            <button type="button" onclick="document.getElementById('processType').value='edge'; document.getElementById('processForm').submit();">边缘检测</button>
+            <button type="button" onclick="window.location.href='/crop'">裁剪大小(框选)</button>
         </form>
     </div>
 
