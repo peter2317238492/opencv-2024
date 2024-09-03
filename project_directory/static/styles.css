@@ -1,0 +1,80 @@
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 60px; /* 上移白色区域 */
+        }
+
+        .toolbar {
+            margin-bottom: 20px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #007bff;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .toolbar button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+        }
+
+        .toolbar button.active {
+            background-color: #0056b3;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+        }
+
+        .result-section {
+            margin-top: 20px;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .image-container div {
+            width: 48%;
+        }
+
+        #uploaded-image, #processed-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
