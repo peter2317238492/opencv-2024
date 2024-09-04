@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- 工具栏-- -->
+        <!-- 工具栏 -->
         <div class="toolbar">
             <button id="btn-1" onclick="showSubPage(1)">区域打码</button>
             <button id="btn-2" onclick="showSubPage(2)">图像分割</button>
@@ -28,11 +28,11 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image" src="" alt="Processed Image">
+                        <img id="processed-image" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
@@ -47,11 +47,11 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-1" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image-1" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image-1" src="" alt="Processed Image">
+                        <img id="processed-image-1" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
@@ -69,17 +69,17 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-2" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image-2" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image-2" src="" alt="Processed Image">
+                        <img id="processed-image-2" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
         <!-- 次页面3 - 证件照制作 -->
         <div id="sub-page-3" class="page" style="display: none;">
@@ -91,11 +91,11 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-3" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image-3" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image-3" src="" alt="Processed Image">
+                        <img id="processed-image-3" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
@@ -111,11 +111,11 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-4" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image-4" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image-4" src="" alt="Processed Image">
+                        <img id="processed-image-4" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
@@ -131,11 +131,11 @@
                 <div class="image-container">
                     <div>
                         <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-5" src="" alt="Uploaded Image" style="display:none;">
+                        <img id="uploaded-image-5" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
-                        <img id="processed-image-5" src="" alt="Processed Image">
+                        <img id="processed-image-5" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>
