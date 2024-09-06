@@ -70,8 +70,9 @@ def process_image():
         x1, y1 = int(point1[0][0] / scale), int(point1[0][1] / scale)
         x2, y2 = int(point2[0][0] / scale), int(point2[0][1] / scale)
 
-        # 打码
-        image[y1:y2, x1:x2] = 0
+        # 打码:在选中长方形的区域内进行模糊处理
+        image[y1:y2, x1:x2] = cv2.GaussianBlur(image[y1:y2, x1:x2], (23, 23), 30)
+        
         _, img_encoded = cv2.imencode('.png', image)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
     
