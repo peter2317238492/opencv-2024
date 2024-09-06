@@ -118,6 +118,19 @@ def process_image():
         foreground=foreground.astype(np.uint8)
         final_image = cv2.resize(foreground, (413, 531))
         
+        #判断下方是否有白边,如果有,找到白边的最高位置,然后裁剪
+        gray = cv2.cvtColor(final_image, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if len(contours) > 0:
+            y = min(contours[0].reshape(-1, 2)[:, 1])
+            final_image = final_image[:y, :]
+            
+        
+        #在图片的上方增加白边,使得图片为证件照大小
+        top = 531 - final_image.shape[0]
+        final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+        
         _, img_encoded = cv2.imencode('.png', final_image)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
         
