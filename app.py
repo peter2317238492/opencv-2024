@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request, send_file
 import cv2
 import numpy as np
+import dlib
+import os
+from imutils import face_utils
 from io import BytesIO
+import onnxruntime as ort
+
+
+
 
 app = Flask(__name__)
 
@@ -68,6 +75,55 @@ def process_image():
         _, img_encoded = cv2.imencode('.png', image)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
     
+
+    if function_id == 3:  # 证件照制作
+        detector = dlib.get_frontal_face_detector()
+        predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        #检测人脸
+        rects = detector(gray, 0)
+        for rect in rects:
+            shape = predictor(gray, rect)
+            shape = face_utils.shape_to_np(shape)
+            
+        
+                
+        from imutils.face_utils import FaceAligner
+        
+        fa= FaceAligner(predictor, desiredFaceWidth=256,desiredFaceHeight=384)
+        faceAligned = fa.align(image, gray, rect)
+        
+        onnx_session = ort.InferenceSession("modnet.onnx")
+        
+        readytomatting = cv2.resize(faceAligned, (512, 512))
+        
+        # Prepare the input data
+        image_normalized=readytomatting.astype(np.float32)/255.0
+        image_normalized = np.transpose(image_normalized, (2, 0, 1))
+        image_input = image_normalized[np.newaxis, :]  # 添加batch维度
+        onnx_inputs = {onnx_session.get_inputs()[0].name: image_input}
+        onnx_outputs = onnx_session.run(None, onnx_inputs)
+        matte = onnx_outputs[0][0][0]
+        
+        # 创建一个白色背景图像
+        white_background = np.ones_like(readytomatting) * 255
+
+        # 增加alpha通道维度
+        matte = np.expand_dims(matte, axis=-1)
+
+        # 合成前景和白色背景
+        foreground = readytomatting * matte + white_background * (1 - matte)
+        #调整为证件照大小
+        foreground=foreground.astype(np.uint8)
+        final_image = cv2.resize(foreground, (413, 531))
+        
+        _, img_encoded = cv2.imencode('.png', final_image)
+        return send_file(BytesIO(img_encoded), mimetype='image/png')
+        
+
+        
+        
 
 if __name__ == '__main__':
     app.run(debug=True)
