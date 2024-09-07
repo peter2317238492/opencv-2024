@@ -16,6 +16,7 @@
             <button id="btn-4" onclick="showSubPage(4)">图像换背景</button>
             <button id="btn-5" onclick="showSubPage(5)">其他</button>
             <button id="btn-6" onclick="showSubPage(6)">图片旋转</buttion>
+            <button id="btn-7" onclick="showSubPage(7)">图片翻转</buttion>
 
         </div>
         
@@ -172,6 +173,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- 次页面7 - 图片翻转 -->
+        <div id="sub-page-7" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-7" accept="image/*">
+                <label for="flip-direction">选择翻转方向</label>
+                <select id="flip-direction">
+                    <option value="horizontal">左右翻转</option>
+                    <option value="vertical">上下翻转</option>
+                </select>
+                <button onclick="uploadImage(7)">上传图片</button>
+                <button onclick="downloadImage(7)">下载图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-7" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-7" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
     </div>
     <!-- 加载JavaScript -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>

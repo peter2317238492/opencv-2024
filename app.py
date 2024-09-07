@@ -225,6 +225,17 @@ def process_image():
             rotated_image = cv2.warpAffine(image, M, (new_w, new_h))
 
             _, img_encoded = cv2.imencode('.png', rotated_image)
+    if function_id == 7:  # 图片翻转
+        flip_direction = request.form.get('flip_direction')
+        if flip_direction == 'horizontal':
+            flipped_image = cv2.flip(image, 1)
+        elif flip_direction == 'vertical':
+            flipped_image = cv2.flip(image, 0)
+        else:
+            return 'Invalid flip direction', 400
+
+        _, img_encoded = cv2.imencode('.png', flipped_image)
+        return send_file(BytesIO(img_encoded), mimetype='image/png')
             
             
     return send_file(BytesIO(img_encoded), mimetype='image/png')
