@@ -218,13 +218,14 @@ def process_image():
         # 加载和预处理输入图像
         img, scale = load_test_data_ani('input_image.jpg')
         
-        #删除图片
-        os.remove('input_image.jpg')
+        
         # 进行动漫风格转换
         anime_img = Convert_ani(img, scale,session)
         
         # Return processed image
         _, img_encoded = cv2.imencode('.png', anime_img)
+        #删除图片
+        os.remove('input_image.jpg')
         return send_file(BytesIO(img_encoded), mimetype='image/png') 
         # 显示结果
         cv2.imshow("Anime Style Image", anime_img)
