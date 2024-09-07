@@ -17,15 +17,15 @@ function uploadImage(pageNumber) {
         formData.append('threshold', threshold);
     }
 
-    const uploadedImageUrl = URL.createObjectURL(file);
-    const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);
-    uploadedImage.src = uploadedImageUrl;
-    uploadedImage.style.display = 'block';
+    const uploadedImageUrl = URL.createObjectURL(file);   // 本地预览
+    const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);  // 显示上传的图像
+    uploadedImage.src = uploadedImageUrl;  // 显示上传的图像
+    uploadedImage.style.display = 'block';  // 显示上传的图像
 
     fetch('/process_image', {
         method: 'POST',
         body: formData
-    })
+    })        //// 向服务器发送图像
     .then(response => response.blob())
     .then(blob => {
         const imageUrl = URL.createObjectURL(blob);
@@ -34,7 +34,7 @@ function uploadImage(pageNumber) {
     .catch(error => {
         console.error('错误:', error);
     });
-}
+}  // uploadImage
 
 function showSubPage(pageNumber) {
     const pages = document.querySelectorAll('.page');
@@ -43,4 +43,4 @@ function showSubPage(pageNumber) {
     const buttons = document.querySelectorAll('.toolbar button');
     buttons.forEach(button => button.classList.remove('active'));
     document.getElementById(`btn-${pageNumber}`).classList.add('active');
-}
+}  // showSubPage
