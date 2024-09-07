@@ -7,7 +7,36 @@ from imutils import face_utils
 from io import BytesIO
 import onnxruntime as ort
 
+# 处理图像
+def process_image_ani(img, x32=True):
+    h, w = img.shape[:2]
+    if x32:  # 调整为32的倍数
+        def to_32s(x):
+            return 256 if x < 256 else x - x % 32
+        img = cv2.resize(img, (to_32s(w), to_32s(h)))
+    # 转换为 RGB 格式，并归一化到 [-1, 1]
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32) / 127.5 - 1.0
+    return img
 
+# 加载测试数据
+def load_test_data_ani(image_path):
+    img0 = cv2.imread(image_path).astype(np.float32)
+    img = process_image_ani(img0)  # 处理图像
+    img = np.expand_dims(img, axis=0)  # 增加 batch 维度
+    return img, img0.shape[:2]  # 返回原始图像尺寸以便恢复
+
+# 使用模型进行转换
+def Convert_ani(img, scale,session):
+    x = session.get_inputs()[0].name
+    y = session.get_outputs()[0].name
+    # 使用 ONNX 模型进行推理
+    fake_img = session.run([y], {x: img})[0]
+    # 反归一化并恢复为原始尺寸
+    images = (np.squeeze(fake_img) + 1.) / 2 * 255
+    images = np.clip(images, 0, 255).astype(np.uint8)
+    # 恢复为原始图像大小
+    output_image = cv2.resize(images, (scale[1], scale[0]))
+    return cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR)  # 转回 BGR 格式
 
 
 app = Flask(__name__)
@@ -180,6 +209,31 @@ def process_image():
         _, img_encoded = cv2.imencode('.png', result_image)
         return send_file(BytesIO(img_encoded), mimetype='image/png') 
         
+    if function_id == 5:  # 图像卡通化功能
+        session = ort.InferenceSession('Shinkai_53.onnx')
+        
+        #保存图片
+        cv2.imwrite('input_image.jpg', image)
+
+        # 加载和预处理输入图像
+        img, scale = load_test_data_ani('input_image.jpg')
+        
+        #删除图片
+        os.remove('input_image.jpg')
+        # 进行动漫风格转换
+        anime_img = Convert_ani(img, scale,session)
+        
+        # Return processed image
+        _, img_encoded = cv2.imencode('.png', anime_img)
+        return send_file(BytesIO(img_encoded), mimetype='image/png') 
+        # 显示结果
+        cv2.imshow("Anime Style Image", anime_img)
+        cv2.imwrite("output_anime_image.jpg", anime_img)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
     if function_id == 6: #图片旋转
         # 获取旋转角度
         angle = int(request.form.get('angle', 90)) # 默认旋转90度
@@ -231,3 +285,4 @@ def process_image():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
