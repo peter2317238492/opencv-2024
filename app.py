@@ -180,6 +180,54 @@ def process_image():
         _, img_encoded = cv2.imencode('.png', result_image)
         return send_file(BytesIO(img_encoded), mimetype='image/png') 
         
+    if function_id == 6: #图片旋转
+        # 获取旋转角度
+        angle = int(request.form.get('angle', 90)) # 默认旋转90度
+        # 获取图像的宽度和高度
+        (h, w) = image.shape[:2]
+        center = (w // 2, h // 2)
+        # 如果是负数，转换为正数
+        if angle < 0:
+            angle = 360 + angle
+        # 如果是90,180,270,360的倍数，直接旋转
+        if angle % 90 == 0:
+            if angle % 180 == 0:
+                # 180度和360度旋转不需要改变尺寸
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                rotated_image = cv2.warpAffine(image, M, (w, h))
+            else:
+                # 90度和270度旋转需要交换宽度和高度
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                new_w, new_h = h, w
+                M[0, 2] += (new_w / 2) - center[0]
+                M[1, 2] += (new_h / 2) - center[1]
+                rotated_image = cv2.warpAffine(image, M, (new_w, new_h))
+            _, img_encoded = cv2.imencode('.png', rotated_image)
+        else:
+            # 任意角度旋转
+            # 旋转图像
+            
+
+            # 计算旋转矩阵
+            M = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+            # 计算旋转后的图像边界框
+            cos = np.abs(M[0, 0])
+            sin = np.abs(M[0, 1])
+            new_w = int((h * sin) + (w * cos))
+            new_h = int((h * cos) + (w * sin))
+
+            # 调整旋转矩阵以考虑平移
+            M[0, 2] += (new_w / 2) - center[0]
+            M[1, 2] += (new_h / 2) - center[1]
+
+            # 执行旋转并调整图像大小
+            rotated_image = cv2.warpAffine(image, M, (new_w, new_h))
+
+            _, img_encoded = cv2.imencode('.png', rotated_image)
+            
+            
+    return send_file(BytesIO(img_encoded), mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -15,6 +15,7 @@
             <button id="btn-3" onclick="showSubPage(3)">证件照制作</button>
             <button id="btn-4" onclick="showSubPage(4)">图像换背景</button>
             <button id="btn-5" onclick="showSubPage(5)">其他</button>
+            <button id="btn-6" onclick="showSubPage(6)">图片旋转</buttion>
 
         </div>
         
@@ -42,6 +43,7 @@
             <div class="upload-section">
                 <input type="file" id="upload-image-1" accept="image/*">
                 <button onclick="uploadImage(1)">上传图片</button>
+                <button onclick="downloadImage(1)">下载图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -64,6 +66,7 @@
                 <input type="number" id="threshold-value" value="127" min="0" max="255">
                 <label for="threshold-value">阈值</label>
                 <button onclick="uploadImage(2)">上传并分割图片</button>
+                <button onclick="downloadImage(2)">下载图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -85,6 +88,7 @@
             <div class="upload-section">
                 <input type="file" id="upload-image-3" accept="image/*">
                 <button onclick="uploadImage(3)">上传图片</button>
+                <button onclick="downloadImage(3)">下载图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -108,6 +112,7 @@
                 <label for="upload-background-4">上传背景图片:</label>
                 <input type="file" id="upload-background-4" accept="image/*"><br><br>
                 <button onclick="uploadImagesForBackgroundReplacement(4)">上传并处理图片</button>
+                <button onclick="downloadImage(4)">下载图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -129,6 +134,7 @@
             <div class="upload-section">
                 <input type="file" id="upload-image-5" accept="image/*">
                 <button onclick="uploadImage(5)">上传图片</button>
+                <button onclick="downloadImage(5)">下载图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -139,6 +145,29 @@
                     <div>
                         <h2>处理后的图片</h2>
                         <img id="processed-image-5" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 次页面6 - 图片旋转 -->
+        <div id="sub-page-6" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-6" accept="image/*">
+                <input type="number" id="angle-value" value="90" min="0" max="360">
+                <label for="angle-value">旋转角度</label>
+                <button onclick="uploadImage(6)">上传并旋转图片</button>
+                <button onclick="downloadImage(6)">下载图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-6" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-6" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
                     </div>
                 </div>
             </div>

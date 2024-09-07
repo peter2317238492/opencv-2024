@@ -16,16 +16,21 @@ function uploadImage(pageNumber) {
         const threshold = document.getElementById('threshold-value').value;
         formData.append('threshold', threshold);
     }
+    //对于图像旋转功能,传递角度
+    if (pageNumber === 6) {
+        const angle = document.getElementById('angle-value').value;
+        formData.append('angle', angle);
+    }
 
-    const uploadedImageUrl = URL.createObjectURL(file);
-    const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);
-    uploadedImage.src = uploadedImageUrl;
-    uploadedImage.style.display = 'block';
+    const uploadedImageUrl = URL.createObjectURL(file);   // 本地预览
+    const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);  // 显示上传的图像
+    uploadedImage.src = uploadedImageUrl;  // 显示上传的图像
+    uploadedImage.style.display = 'block';  // 显示上传的图像
 
     fetch('/process_image', {
         method: 'POST',
         body: formData
-    })
+    })        //// 向服务器发送图像
     .then(response => response.blob())
     .then(blob => {
         const imageUrl = URL.createObjectURL(blob);
@@ -34,7 +39,7 @@ function uploadImage(pageNumber) {
     .catch(error => {
         console.error('错误:', error);
     });
-}
+}  // uploadImage
 
 function showSubPage(pageNumber) {
     const pages = document.querySelectorAll('.page');
@@ -43,7 +48,26 @@ function showSubPage(pageNumber) {
     const buttons = document.querySelectorAll('.toolbar button');
     buttons.forEach(button => button.classList.remove('active'));
     document.getElementById(`btn-${pageNumber}`).classList.add('active');
+}  // showSubPage
+
+function downloadImage(pageNumber) {
+    const image = document.getElementById(`processed-image-${pageNumber}`);
+    const url = image.src;
+    
+    // 检查是否是图片资源
+   // if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'image.jpg';  // 设置合适的扩展名
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    //} else {
+     //   console.error('URL does not point to a valid image file.');
+   // }
 }
+
+
 
 function uploadImagesForBackgroundReplacement(pageNumber) {
     const foregroundInput = document.getElementById(`upload-foreground-${pageNumber}`);
