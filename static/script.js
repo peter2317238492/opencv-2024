@@ -16,6 +16,11 @@ function uploadImage(pageNumber) {
         const threshold = document.getElementById('threshold-value').value;
         formData.append('threshold', threshold);
     }
+    //对于图像旋转功能,传递角度
+    if (pageNumber === 6) {
+        const angle = document.getElementById('angle-value').value;
+        formData.append('angle', angle);
+    }
 
     const uploadedImageUrl = URL.createObjectURL(file);   // 本地预览
     const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);  // 显示上传的图像
