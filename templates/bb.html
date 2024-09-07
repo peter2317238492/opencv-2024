@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCV Image Processing System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <button id="btn-1" onclick="showSubPage(1)">区域打码</button>
+            <button id="btn-2" onclick="showSubPage(2)">图像分割</button>
+            <button id="btn-3" onclick="showSubPage(3)">证件照制作</button>
+            <button id="btn-4" onclick="showSubPage(4)">图像换背景</button>
+            <button id="btn-5" onclick="showSubPage(5)">其他</button>
+
+        </div>
+        
+        <!-- 主页面内容 -->
+        <div id="main-page" class="page">
+            <div class="upload-section">
+                <input type="file" id="upload-image" accept="image/*">
+                <button onclick="uploadImage(1)">上传图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 次页面1 - 区域打码 -->
+        <div id="sub-page-1" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-1" accept="image/*">
+                <button onclick="uploadImage(1)">上传图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-1" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-1" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 次页面2 - 图像分割 -->
+        <div id="sub-page-2" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-2" accept="image/*">
+                <input type="number" id="threshold-value" value="127" min="0" max="255">
+                <label for="threshold-value">阈值</label>
+                <button onclick="uploadImage(2)">上传并分割图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-2" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-2" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 次页面3 - 证件照制作 -->
+        <div id="sub-page-3" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-3" accept="image/*">
+                <button onclick="uploadImage(3)">上传图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-3" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-3" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 次页面4 - 图像换背景 -->
+        <div id="sub-page-4" class="page" style="display: none;">
+            <div class="upload-section">
+                <label for="upload-image-4">上传前景图片:</label>
+                <input type="file" id="upload-foreground-4" accept="image/*"><br><br>
+                <label for="upload-background-4">上传背景图片:</label>
+                <input type="file" id="upload-background-4" accept="image/*"><br><br>
+                <button onclick="uploadImagesForBackgroundReplacement(4)">上传并处理图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>前景图片</h2>
+                        <img id="uploaded-foreground-4" src="" alt="Foreground Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-4" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 次页面5 - 其他 -->
+        <div id="sub-page-5" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-5" accept="image/*">
+                <button onclick="uploadImage(5)">上传图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-5" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-5" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 加载JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
