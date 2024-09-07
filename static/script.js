@@ -50,16 +50,16 @@ function downloadImage(pageNumber) {
     const url = image.src;
     
     // 检查是否是图片资源
-    if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
+   // if (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png')) {
         const link = document.createElement('a');
         link.href = url;
         link.download = 'image.jpg';  // 设置合适的扩展名
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    } else {
-        console.error('URL does not point to a valid image file.');
-    }
+    //} else {
+     //   console.error('URL does not point to a valid image file.');
+   // }
 }
 
 
