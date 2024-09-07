@@ -21,6 +21,11 @@ function uploadImage(pageNumber) {
         const angle = document.getElementById('angle-value').value;
         formData.append('angle', angle);
     }
+    //对于图像翻转功能,传递翻转方向
+    if (pageNumber === 7) {
+        const flipDirection = document.getElementById('flip-direction').value;
+        formData.append('flip_direction', flipDirection);
+    }
 
     const uploadedImageUrl = URL.createObjectURL(file);   // 本地预览
     const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);  // 显示上传的图像
