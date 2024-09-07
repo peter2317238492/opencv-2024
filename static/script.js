@@ -44,3 +44,44 @@ function showSubPage(pageNumber) {
     buttons.forEach(button => button.classList.remove('active'));
     document.getElementById(`btn-${pageNumber}`).classList.add('active');
 }
+
+function uploadImagesForBackgroundReplacement(pageNumber) {
+    const foregroundInput = document.getElementById(`upload-foreground-${pageNumber}`);
+    const backgroundInput = document.getElementById(`upload-background-${pageNumber}`);
+    
+    const foregroundFile = foregroundInput.files[0];
+    const backgroundFile = backgroundInput.files[0];
+
+    if (!foregroundFile || !backgroundFile) {
+        alert("请同时选择前景和背景图片。");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('foreground', foregroundFile);
+    formData.append('background', backgroundFile);
+    formData.append('function_id', pageNumber);
+    formData.append('image', foregroundFile);
+
+    // Preview the uploaded images
+    const uploadedForegroundUrl = URL.createObjectURL(foregroundFile);
+    const uploadedForeground = document.getElementById(`uploaded-foreground-${pageNumber}`);
+    uploadedForeground.src = uploadedForegroundUrl;
+    uploadedForeground.style.display = 'block';
+
+    console.log(foregroundFile);
+    console.log(backgroundFile);
+
+    fetch('/process_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const imageUrl = URL.createObjectURL(blob);
+        document.getElementById(`processed-image-${pageNumber}`).src = imageUrl;
+    })
+    .catch(error => {
+        console.error('错误:', error);
+    });
+}

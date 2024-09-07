@@ -103,14 +103,17 @@
         <!-- 次页面4 - 图像换背景 -->
         <div id="sub-page-4" class="page" style="display: none;">
             <div class="upload-section">
-                <input type="file" id="upload-image-4" accept="image/*">
-                <button onclick="uploadImage(4)">上传图片</button>
+                <label for="upload-image-4">上传前景图片:</label>
+                <input type="file" id="upload-foreground-4" accept="image/*"><br><br>
+                <label for="upload-background-4">上传背景图片:</label>
+                <input type="file" id="upload-background-4" accept="image/*"><br><br>
+                <button onclick="uploadImagesForBackgroundReplacement(4)">上传并处理图片</button>
             </div>
             <div class="result-section">
                 <div class="image-container">
                     <div>
-                        <h2>用户上传的图片</h2>
-                        <img id="uploaded-image-4" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                        <h2>前景图片</h2>
+                        <img id="uploaded-foreground-4" src="" alt="Foreground Image" style="display:none; max-width: 100%; height: auto;">
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
@@ -119,6 +122,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- 次页面5 - 其他 -->
         <div id="sub-page-5" class="page" style="display: none;">

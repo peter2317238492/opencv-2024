@@ -12,6 +12,7 @@ import onnxruntime as ort
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     return render_template('bb.html')
@@ -20,6 +21,8 @@ def index():
 def process_image():
     file = request.files['image']
     function_id = int(request.form['function_id'])
+    print(request.files)
+    print(request.form)
 
     in_memory_file = BytesIO()
     file.save(in_memory_file)
@@ -136,7 +139,46 @@ def process_image():
         return send_file(BytesIO(img_encoded), mimetype='image/png')
         
 
+    if function_id == 4:  # 图像换背景功能
+        # Check if files are uploaded
+        if 'foreground' not in request.files or 'background' not in request.files:
+            return "Missing foreground or background file", 400
         
+        foreground_file = request.files['foreground']
+        background_file = request.files['background']
+        
+        # Log to verify files are received
+        print(f"Foreground file: {foreground_file.filename}")
+        print(f"Background file: {background_file.filename}")
+        
+        if not foreground_file or not background_file:
+            return "Foreground or background file is missing", 400
+
+
+        # Read the images into OpenCV
+        foreground_data = np.frombuffer(foreground_file.read(), dtype=np.uint8)
+        background_data = np.frombuffer(background_file.read(), dtype=np.uint8)
+        foreground_image = cv2.imdecode(foreground_data, cv2.IMREAD_COLOR)
+        background_image = cv2.imdecode(background_data, cv2.IMREAD_COLOR)
+
+        # Resize background to match foreground
+        background_image_resized = cv2.resize(background_image, (foreground_image.shape[1], foreground_image.shape[0]))
+
+        # Perform background replacement (assuming transparency)
+        gray = cv2.cvtColor(foreground_image, cv2.COLOR_BGR2GRAY)
+        _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+
+        # Invert mask and combine images
+        background_mask = cv2.bitwise_not(mask)
+        foreground_part = cv2.bitwise_and(foreground_image, foreground_image, mask=mask)
+        background_part = cv2.bitwise_and(background_image_resized, background_image_resized, mask=background_mask)
+
+        # Combine both parts
+        result_image = cv2.add(foreground_part, background_part)
+
+        # Return processed image
+        _, img_encoded = cv2.imencode('.png', result_image)
+        return send_file(BytesIO(img_encoded), mimetype='image/png') 
         
 
 if __name__ == '__main__':
