@@ -6,6 +6,208 @@ import os
 from imutils import face_utils
 from io import BytesIO
 import onnxruntime as ort
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
+import cv2
+import numpy as np
+from threading import Thread
+
+class ImageMosaicEditor: #打码编辑器
+    def __init__(self, root):
+        self.root = root
+        self.root.title("图像编辑器")
+
+        # 定义窗口的总宽度和高度
+        self.window_width = 1600  # 整个窗口宽度
+        self.window_height = 600  # 整个窗口高度（左右各显示一张图）
+
+        # 创建工具栏
+        self.toolbar = tk.Frame(root)
+        self.toolbar.pack(side=tk.TOP, fill=tk.X)
+
+        self.select_button = tk.Button(self.toolbar, text="选择打码区域", command=self.select_area)
+        self.select_button.pack(side=tk.LEFT, padx=2, pady=2)
+
+        self.brush_button = tk.Button(self.toolbar, text="涂抹打码", command=self.brush_mode)
+        self.brush_button.pack(side=tk.LEFT, padx=2, pady=2)
+
+        self.undo_button = tk.Button(self.toolbar, text="撤销", command=self.undo)
+        self.undo_button.pack(side=tk.LEFT, padx=2, pady=2)
+
+        self.finish_button = tk.Button(self.toolbar, text="完成", command=self.finish)
+        self.finish_button.pack(side=tk.LEFT, padx=2, pady=2)
+
+        # 创建拖动条调整笔刷大小
+        self.brush_size_slider = tk.Scale(self.toolbar, from_=5, to=50, orient=tk.HORIZONTAL, label="笔刷大小")
+        self.brush_size_slider.set(20)  # 默认值为20
+        self.brush_size_slider.pack(side=tk.LEFT, padx=2, pady=2)
+
+        # 创建画布
+        self.canvas = tk.Canvas(root, width=self.window_width, height=self.window_height)
+        self.canvas.pack()
+
+        # 加载图像
+        self.load_image()
+
+        # 初始化变量
+        self.rect = None
+        self.start_x = None
+        self.start_y = None
+        self.end_x = None
+        self.end_y = None
+        self.rect_id = None
+        self.history = []
+        self.brush_mode_active = False
+
+    def display_images(self):
+        # 计算每个图像的宽度和高度
+        image_width = self.window_width // 2
+        image_height = self.window_height
+
+        # 将图像按比例缩放到合适的大小
+        self.original_image_resized = self.resize_image(self.original_image, image_width, image_height)
+        self.processed_image_resized = self.resize_image(self.processed_image, image_width, image_height)
+
+        # 将OpenCV图像转换为PIL图像
+        self.original_image_pil = Image.fromarray(cv2.cvtColor(self.original_image_resized, cv2.COLOR_BGR2RGB))
+        self.processed_image_pil = Image.fromarray(cv2.cvtColor(self.processed_image_resized, cv2.COLOR_BGR2RGB))
+
+        # 将PIL图像转换为ImageTk图像
+        self.original_image_tk = ImageTk.PhotoImage(self.original_image_pil)
+        self.processed_image_tk = ImageTk.PhotoImage(self.processed_image_pil)
+
+        # 在画布上显示图像
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.original_image_tk)
+        self.canvas.create_image(image_width, 0, anchor=tk.NW, image=self.processed_image_tk)
+
+    def load_image(self):
+        self.original_image = cv2.imread('input_image.jpg')
+        self.processed_image = self.original_image.copy()
+
+        self.display_images()
+
+    def resize_image(self, image, max_width, max_height):
+        h, w = image.shape[:2]
+        # 计算宽高比，确保等比例缩放
+        scale = min(max_width / w, max_height / h)
+        return cv2.resize(image, (int(w * scale), int(h * scale)))
+
+    def select_area(self):
+        self.brush_mode_active = False
+        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
+        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
+
+    def brush_mode(self):
+        self.brush_mode_active = True
+        self.canvas.bind("<B1-Motion>", self.on_brush_drag)
+
+    def on_button_press(self, event):
+        self.start_x = event.x
+        self.start_y = event.y
+        self.rect_id = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline='red')
+
+    def on_mouse_drag(self, event):
+        cur_x, cur_y = (event.x, event.y)
+        self.canvas.coords(self.rect_id, self.start_x, self.start_y, cur_x, cur_y)
+
+    def on_button_release(self, event):
+        self.end_x = event.x
+        self.end_y = event.y
+        self.rect = (self.start_x, self.start_y, self.end_x, self.end_y)
+        self.canvas.unbind("<ButtonPress-1>")
+        self.canvas.unbind("<B1-Motion>")
+        self.canvas.unbind("<ButtonRelease-1>")
+        self.apply_blur()  # 直接应用打码效果
+
+    def on_brush_drag(self, event):
+        if self.brush_mode_active:
+            # 获取画布上的鼠标坐标
+            x, y = event.x, event.y
+
+            # 计算从画布到实际图像的坐标映射
+            image_width = self.window_width // 2
+            scale_x = self.original_image.shape[1] / image_width
+            scale_y = self.original_image.shape[0] / self.window_height
+
+            # 将鼠标坐标转换为图像坐标
+            img_x = int(x * scale_x)
+            img_y = int(y * scale_y)
+
+            # 确定涂抹区域的范围（根据拖动条确定笔刷大小）
+            brush_size = self.brush_size_slider.get()  # 获取笔刷大小
+            x1 = max(0, img_x - brush_size)
+            y1 = max(0, img_y - brush_size)
+            x2 = min(self.processed_image.shape[1], img_x + brush_size)
+            y2 = min(self.processed_image.shape[0], img_y + brush_size)
+
+            # 对涂抹区域应用模糊处理
+            roi = self.processed_image[y1:y2, x1:x2]
+            blurred_roi = cv2.GaussianBlur(roi, (15, 15), 0)
+
+            # 保存历史状态
+            self.history.append(self.processed_image.copy())
+
+            # 应用模糊效果
+            self.processed_image[y1:y2, x1:x2] = blurred_roi
+
+            # 实时显示涂抹打码效果
+            self.display_images()
+
+    def apply_blur(self):
+        if not self.rect:
+            messagebox.showwarning("警告", "请先选择打码区域")
+            return
+
+        # 获取选择区域的坐标
+        x1, y1, x2, y2 = self.rect
+        # 计算缩放后的坐标
+        image_width = self.window_width // 2
+        scale_x = self.original_image.shape[1] / image_width
+        scale_y = self.original_image.shape[0] / self.window_height
+
+        # 将坐标转换回图像上的实际坐标
+        x1 = int(x1 * scale_x)
+        y1 = int(y1 * scale_y)
+        x2 = int(x2 * scale_x)
+        y2 = int(y2 * scale_y)
+
+        roi = self.processed_image[y1:y2, x1:x2]
+        blurred_roi = cv2.GaussianBlur(roi, (15, 15), 0)
+
+        # 保存历史状态
+        self.history.append(self.processed_image.copy())
+
+        # 应用模糊效果
+        self.processed_image[y1:y2, x1:x2] = blurred_roi
+        self.display_images()  # 实时显示打码效果
+
+    def undo(self):
+        if self.history:
+            self.processed_image = self.history.pop()
+            self.display_images()
+        else:
+            messagebox.showwarning("警告", "没有可以撤销的操作")
+
+    def finish(self):
+        # 获取处理后的图像
+        processed_image = self.processed_image
+
+        # 使用 cv2.imencode 将图像编码为 PNG 格式
+        _, img_encoded = cv2.imencode('.png', processed_image)
+
+        # 使用 BytesIO 来处理二进制流
+        self.img_bytes = BytesIO(img_encoded)
+
+        # 关闭Tkinter窗口
+        self.root.destroy()
+
+def open_editor_mosaic():
+    global editor
+    root = tk.Tk()
+    editor = ImageMosaicEditor(root)
+    root.mainloop()  # 阻塞，直到 Tkinter 编辑器关闭
 
 # 处理图像
 def process_image_ani(img, x32=True):
@@ -78,7 +280,22 @@ def process_image():
         window_width = int(image.shape[1] * scale)
         window_height = int(image.shape[0] * scale)
         resized_image = cv2.resize(image, (window_width, window_height))
+        cv2.imwrite('input_image.jpg', image)
 
+        # 启动 Tkinter 编辑器的线程
+        thread = Thread(target=open_editor_mosaic)
+        thread.start()
+        thread.join()  # 等待编辑器关闭
+        
+        # 检查编辑器是否成功返回图像
+        if editor and editor.img_bytes:
+            # 返回处理后的图像
+            return send_file(editor.img_bytes, mimetype='image/png')
+        else:
+            return "No image processed", 400
+
+
+        '''
         # 展示一个窗口，将图像缩放到合适的大小，用户用鼠标选择打码区域
         def on_mouse(event, x, y, flags, param):
             if event == cv2.EVENT_LBUTTONDOWN:
@@ -108,7 +325,7 @@ def process_image():
         _, img_encoded = cv2.imencode('.png', image)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
     
-
+        '''
     if function_id == 3:  # 证件照制作
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
