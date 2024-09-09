@@ -88,6 +88,20 @@
         <div id="sub-page-3" class="page" style="display: none;">
             <div class="upload-section">
                 <input type="file" id="upload-image-3" accept="image/*">
+                <label for="background-color-3">选择背景颜色:</label>
+                <select id="background-color-3">
+                    <option value="white">白色</option>
+                    <option value="red">红色</option>
+                    <option value="blue">蓝色</option>
+                </select>
+                <label for="photo-size-3">选择证件照尺寸:</label>
+                <select id="photo-size-3">
+                    <option value="259x377">小1寸证件照（259×377）</option>
+                    <option value="295x413">1寸证件照（413×295）</option>
+                    <option value="390x567">大1寸证件照（567×390）</option>
+                    <option value="413x626">2寸证件照（413×626）</option>
+                    <option value="567x826">大2寸证件照（567×826）</option>
+                </select>
                 <button onclick="uploadImage(3)">上传图片</button>
                 <button onclick="downloadImage(3)">下载图片</button>
             </div>

@@ -16,6 +16,14 @@ function uploadImage(pageNumber) {
         const threshold = document.getElementById('threshold-value').value;
         formData.append('threshold', threshold);
     }
+    //对于证件照功能，传递背景颜色和照片尺寸
+    if (pageNumber === 3) {
+        const backgroundColor = document.getElementById('background-color-3').value;
+        const photoSize = document.getElementById('photo-size-3').value;
+        formData.append('background_color', backgroundColor);
+        formData.append('photo_size', photoSize);
+    }
+
     //对于图像旋转功能,传递角度
     if (pageNumber === 6) {
         const angle = document.getElementById('angle-value').value;
