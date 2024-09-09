@@ -327,8 +327,13 @@ def process_image():
     
         '''
     if function_id == 3:  # 证件照制作
+        background_color = request.form.get('background_color')
+        photo_size = request.form.get('photo_size')
+        width, height = map(int, photo_size.split('x'))
         detector = dlib.get_frontal_face_detector()
         predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+        #读取输入图像的尺寸
+        image_height, image_width = image.shape[:2]
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
         #检测人脸
@@ -356,17 +361,131 @@ def process_image():
         onnx_outputs = onnx_session.run(None, onnx_inputs)
         matte = onnx_outputs[0][0][0]
         
-        # 创建一个白色背景图像
-        white_background = np.ones_like(readytomatting) * 255
+        # 设置背景颜色
+        if background_color == 'white':
+            bg_color = (255, 255, 255)
+        elif background_color == 'red':
+            bg_color = (0, 0, 255)
+        elif background_color == 'blue':
+            bg_color = (255, 0, 0)
+        else:
+            return 'Invalid background color', 400
+        # 按照要求的背景颜色(红白蓝)生成背景图
+        if background_color == 'red':
+            white_background = np.ones_like(readytomatting) * 255
+            white_background[:, :, 0] = 0
+            white_background[:, :, 1] = 0
+        elif background_color == 'white':
+            white_background = np.ones_like(readytomatting) * 255
+        elif background_color == 'blue':
+            white_background = np.ones_like(readytomatting) * 255
+            white_background[:, :, 1] = 0
+            white_background[:, :, 2] = 0
+        else:
+            return 'Invalid background color', 400
+        
 
         # 增加alpha通道维度
         matte = np.expand_dims(matte, axis=-1)
 
         # 合成前景和白色背景
         foreground = readytomatting * matte + white_background * (1 - matte)
+        foreground=cv2.resize(foreground,(image_width, image_height))
         #调整为证件照大小
         foreground=foreground.astype(np.uint8)
-        final_image = cv2.resize(foreground, (413, 531))
+        
+        # 获取原始图像的宽高比
+        (h, w) = foreground.shape[:2]
+        aspect_ratio = w / h
+
+        # 根据目标尺寸计算新的尺寸，保持宽高比
+        if width / height > aspect_ratio:
+            new_height = height
+            new_width = int(height * aspect_ratio)
+        else:
+            new_width = width
+            new_height = int(width / aspect_ratio)
+
+        # 调整尺寸但保持宽高比
+        resized_foreground = cv2.resize(foreground, (new_width, new_height))
+
+        
+        if new_width == width:
+            top=height-new_height
+            final_image = cv2.copyMakeBorder(resized_foreground, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=bg_color)
+        else:
+            left = (width - new_width) // 2
+            right = width - new_width - left
+            final_image = cv2.copyMakeBorder(resized_foreground, 0, 0, left, right, cv2.BORDER_CONSTANT, value=bg_color)
+
+        if background_color =='white':
+            gray = cv2.cvtColor(final_image, cv2.COLOR_BGR2GRAY)
+            _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+            contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if len(contours) > 0:
+                y = min(contours[0].reshape(-1, 2)[:, 1])
+                final_image = final_image[:y, :]
+            top = height - final_image.shape[0]
+            final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=bg_color)
+                
+        if background_color =='red':
+            #去除下方的红色背景
+            #转换为HSV颜色空间
+            hsv = cv2.cvtColor(final_image, cv2.COLOR_BGR2HSV)
+            #提取红色区域
+            lower_red = np.array([0, 43, 46])
+            upper_red = np.array([10, 255, 255])
+            mask1 = cv2.inRange(hsv, lower_red, upper_red)
+            lower_red = np.array([156, 43, 46])
+            upper_red = np.array([180, 255, 255])
+            mask2 = cv2.inRange(hsv, lower_red, upper_red)
+            mask = mask1 + mask2
+            #腐蚀膨胀
+            mask = cv2.erode(mask, None, iterations=2)
+            mask = cv2.dilate(mask, None, iterations=2)
+            #找到红色区域的轮廓
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if len(contours) > 0:
+                y = min(contours[0].reshape(-1, 2)[:, 1])
+                final_image = final_image[:y, :]
+                
+            # 确保裁剪后的图像高度不超过目标高度
+            if final_image.shape[0] > height:
+                final_image = final_image[:height, :]
+            
+            top = height - final_image.shape[0]
+            final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=bg_color)
+
+        
+        if background_color =='blue':
+            #去除下方的蓝色背景
+            #转换为HSV颜色空间
+            hsv = cv2.cvtColor(final_image, cv2.COLOR_BGR2HSV)
+            #提取蓝色区域
+            lower_blue = np.array([100, 43, 46])
+            upper_blue = np.array([124, 255, 255])
+            mask = cv2.inRange(hsv, lower_blue, upper_blue)
+            #腐蚀膨胀
+            mask = cv2.erode(mask, None, iterations=2)
+            mask = cv2.dilate(mask, None, iterations=2)
+            #找到蓝色区域的轮廓
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if len(contours) > 0:
+                y = min(contours[0].reshape(-1, 2)[:, 1])
+                final_image = final_image[:y, :]
+            
+            # 确保裁剪后的图像高度不超过目标高度
+            if final_image.shape[0] > height:
+                final_image = final_image[:height, :]
+            
+            top = height - final_image.shape[0]
+            final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=bg_color)
+            
+        
+        
+            
+        '''
+        final_image = cv2.resize(foreground, (height,width))
         
         #判断下方是否有白边,如果有,找到白边的最高位置,然后裁剪
         gray = cv2.cvtColor(final_image, cv2.COLOR_BGR2GRAY)
@@ -378,9 +497,12 @@ def process_image():
             
         
         #在图片的上方增加白边,使得图片为证件照大小
-        top = 531 - final_image.shape[0]
-        final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+        top = height - final_image.shape[0]
+        final_image = cv2.copyMakeBorder(final_image, top, 0, 0, 0, cv2.BORDER_CONSTANT, value=bg_color)
         
+        #上下拉伸图片,使得图片为证件照大小
+        #final_image = cv2.resize(final_image, (height, width))
+        '''
         _, img_encoded = cv2.imencode('.png', final_image)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
         
