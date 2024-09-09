@@ -17,6 +17,7 @@
             <button id="btn-5" onclick="showSubPage(5)">图像卡通化</button>
             <button id="btn-6" onclick="showSubPage(6)">图片旋转</buttion>
             <button id="btn-7" onclick="showSubPage(7)">图片翻转</buttion>
+            <button id="btn-8" onclick="showSubPage(8)">梯形校正</button>
 
         </div>
         
@@ -212,6 +213,29 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 次页面8 - 梯形校正 -->
+        <div id="sub-page-8" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-8" accept="image/*">
+                <button onclick="uploadImage(8)">上传图片</button>
+                <button onclick="downloadImage(8)">下载图片</button>
+            </div>
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-8" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>处理后的图片</h2>
+                        <img id="processed-image-8" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <!-- 加载JavaScript -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
