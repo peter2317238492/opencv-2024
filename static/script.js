@@ -226,8 +226,8 @@ function openCropDialog() {
         // 计算缩放比例
         const naturalWidth = cropImage.naturalWidth;
         const naturalHeight = cropImage.naturalHeight;
-        const displayWidth = cropImage.offsetWidth;
-        const displayHeight = cropImage.offsetHeight;
+        const displayWidth = cropImage.clientWidth;
+        const displayHeight = cropImage.clientHeight;
 
         scaleX = naturalWidth / displayWidth;
         scaleY = naturalHeight / displayHeight;
@@ -251,65 +251,40 @@ function startCrop() {
 
 function startSelection(event) {
     cropping = true;  // 标记为正在裁剪
-    
-    // 获取图片相对于父容器的位置
-    const rectLeft = cropImage.offsetLeft;
-    const rectTop = cropImage.offsetTop;
+    const rect = cropImage.getBoundingClientRect();
+    startX = event.clientX - rect.left;
+    startY = event.clientY - rect.top;
 
-    // 获取鼠标点击位置相对于图片的坐标，限制不超出图片范围
-    startX = Math.max(0, event.pageX - rectLeft);  
-    startY = Math.max(0, event.pageY - rectTop);
-
-    // 初始化裁剪框
+    // 显示裁剪框
     selectionBox.style.left = startX + 'px';
     selectionBox.style.top = startY + 'px';
     selectionBox.style.width = '0px';
     selectionBox.style.height = '0px';
-    selectionBox.style.display = 'block';  // 确保框在鼠标按下时立即显示
+    selectionBox.style.display = 'block';
 }
 
 function resizeSelection(event) {
     if (!cropping) return;  // 如果未按下鼠标，则不进行裁剪
-
-    const rectLeft = cropImage.offsetLeft;
-    const rectTop = cropImage.offsetTop;
-    const imageWidth = cropImage.offsetWidth;
-    const imageHeight = cropImage.offsetHeight;
     
-    // 计算鼠标拖动的位置，确保不超出图片的边界
-    endX = Math.min(Math.max(0, event.pageX - rectLeft), imageWidth);  
-    endY = Math.min(Math.max(0, event.pageY - rectTop), imageHeight);
+    const rect = cropImage.getBoundingClientRect();
+    endX = event.clientX - rect.left;
+    endY = event.clientY - rect.top;
 
-    // 更新裁剪框的大小和位置
+    // 仅当鼠标按下时，更新裁剪框大小
     selectionBox.style.width = Math.abs(endX - startX) + 'px';
     selectionBox.style.height = Math.abs(endY - startY) + 'px';
     selectionBox.style.left = Math.min(startX, endX) + 'px';
     selectionBox.style.top = Math.min(startY, endY) + 'px';
-
-    selectionBox.style.display = 'block';  // 在鼠标移动时，确保框保持可见
 }
 
 function endSelection() {
     cropping = false;  // 结束裁剪
+    // 移除事件监听
     document.removeEventListener('mousemove', resizeSelection);
     document.removeEventListener('mouseup', endSelection);
-
-    // 在鼠标释放后，保持红色框可见，直到关闭裁剪对话框
-    selectionBox.style.display = 'block';
-}
-
-function closeCropDialog() {
-    // 关闭裁剪对话框时隐藏红色框
-    cropDialog.style.display = 'none';
-    selectionBox.style.display = 'none';
 }
 
 function performCrop() {
-    if (!startX || !startY || !endX || !endY) {
-        alert('请先选择裁剪区域！');
-        return;
-    }
-
     // 获取裁剪坐标并转换为原始图像坐标
     const x_start = Math.min(startX, endX) * scaleX;
     const y_start = Math.min(startY, endY) * scaleY;
@@ -342,6 +317,7 @@ function performCrop() {
         console.error('Error:', error);
     });
 }
+////////
 
 function adjustImage() {
     const contrast = document.getElementById('contrast-slider').value;

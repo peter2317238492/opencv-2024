@@ -261,8 +261,6 @@
                     <div>
                         <h2>用户上传的图片</h2>
                         <img id="uploaded-image-9" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
-                        <!-- 用于裁剪的选择框 -->
-                        <div id="selection-box" class="selection-box" style="display:none;"></div>
                     </div>
                     <div>
                         <h2>处理后的图片</h2>
@@ -270,12 +268,12 @@
                     </div>
                 </div>
             </div>
-
+        
             <!-- 弹出裁剪框 -->
             <div id="crop-dialog" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid black; background: white; padding: 20px;">
                 <h3>选择裁剪区域</h3>
-                <div style="position: relative;"> <!-- 父容器相对定位 -->
-                    <img id="crop-image" style="max-width: 100%; height: auto; display: block;">
+                <div style="position: relative;">
+                    <img id="crop-image" style="max-width: 100%; height: auto;">
                     <div id="selection-box" class="selection-box" style="display:none;"></div>
                 </div>
                 <button onclick="performCrop()">裁剪</button>
@@ -322,6 +320,7 @@
                 <h2>处理后的图片</h2>
                 <img id="processed-image-10" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
             </div>
+    </div>
     </div>
 
         <!-- 自定义拍照弹窗 -->
