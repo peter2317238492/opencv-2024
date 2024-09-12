@@ -698,6 +698,93 @@ def process_image():
         
         _, img_encoded = cv2.imencode('.png', dst)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
+    
+    
+
+
+def adjust_image(image, contrast=1.0, brightness=0, gamma=1.0):
+    # Adjust contrast and brightness
+    adjusted = cv2.convertScaleAbs(image, alpha=contrast, beta=brightness)
+    
+    # Apply gamma correction
+    gamma_correction = np.array([((i / 255.0) ** (1.0 / gamma)) * 255 for i in np.arange(0, 256)]).astype("uint8")
+    final_image = cv2.LUT(adjusted, gamma_correction)
+    
+    return final_image
+
+@app.route('/adjust_image', methods=['POST'])
+def adjust_image_route():
+    # Fetch image and adjustment parameters
+    file = request.files['image']
+    contrast = float(request.form.get('contrast', 1.0))
+    brightness = int(request.form.get('brightness', 0))
+    gamma = float(request.form.get('gamma', 1.0))
+
+    
+    # Read image
+    in_memory_file = BytesIO()
+    file.save(in_memory_file)
+    data = np.frombuffer(in_memory_file.getvalue(), dtype=np.uint8)
+    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    #save the latest changed image
+    cv2.imwrite('input_image_latest.jpg', image)
+    # Apply adjustments
+    adjusted_image = adjust_image(image, contrast, brightness, gamma)
+    
+    # Encode and return adjusted image
+    _, img_encoded = cv2.imencode('.png', adjusted_image)
+    return send_file(BytesIO(img_encoded), mimetype='image/png')
+
+def auto_adjust_image(image):
+    # Convert the image to the LAB color space to adjust luminance
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+
+    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) to the L-channel
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+
+    # Merge the CLAHE enhanced L-channel with the a and b channels
+    limg = cv2.merge((cl, a, b))
+
+    # Convert back to the BGR color space
+    final_image = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+    return final_image
+
+@app.route('/auto_adjust', methods=['POST'])
+def auto_adjust_route():
+    file = request.files['image']
+
+    # Read image
+    in_memory_file = BytesIO()
+    file.save(in_memory_file)
+    data = np.frombuffer(in_memory_file.getvalue(), dtype=np.uint8)
+    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    #save the latest changed image
+    cv2.imwrite('input_image_latest.jpg', image)
+    # Apply auto adjustment
+    auto_adjusted_image = auto_adjust_image(image)
+
+    # Encode and return the auto-adjusted image
+    _, img_encoded = cv2.imencode('.png', auto_adjusted_image)
+    return send_file(BytesIO(img_encoded), mimetype='image/png')
+
+@app.route('/undo_adjust', methods=['POST'])
+def undo_adjust_route():
+    #look for input_image_latest.jpg, if there is not such file, return the original image
+    if os.path.exists('input_image_latest.jpg'):
+        image = cv2.imread('input_image_latest.jpg')
+    else:
+        file = request.files['image']
+        in_memory_file = BytesIO()
+        file.save(in_memory_file)
+        data = np.frombuffer(in_memory_file.getvalue(), dtype=np.uint8)
+        image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    
+    # Encode and return the auto-adjusted image
+    _, img_encoded = cv2.imencode('.png', image)
+    return send_file(BytesIO(img_encoded), mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)
