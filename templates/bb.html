@@ -282,7 +282,46 @@
                 <button onclick="closeCropDialog()">取消</button>
             </div>
         </div>
-
+        <!--次页面10 - 直方图与色彩,对比度调节-->
+        <div id="sub-page-10" class="page" style="display: none;">
+            <div class="upload-section">
+                <input type="file" id="upload-image-10" accept="image/*">
+                <button onclick="uploadImage(10)">上传图片</button>
+                <button onclick="openCameraDialog(10)">拍照</button>
+                <button onclick="downloadImage(10)">下载图片</button>
+            </div>
+        
+            <div class="result-section">
+                <div class="image-container">
+                    <div>
+                        <h2>用户上传的图片</h2>
+                        <img id="uploaded-image-10" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
+                    </div>
+                    <div>
+                        <h2>直方图</h2>
+                        <canvas id="histogram" width="256" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="controls">
+                <label for="contrast-slider">Contrast</label>
+                <input type="range" id="contrast-slider" min="0.5" max="3" step="0.1" value="1" oninput="adjustImage()">
+                
+                <label for="brightness-slider">Brightness</label>
+                <input type="range" id="brightness-slider" min="-100" max="100" step="1" value="0" oninput="adjustImage()">
+                
+                <label for="gamma-slider">Gamma</label>
+                <input type="range" id="gamma-slider" min="0.1" max="3" step="0.1" value="1" oninput="adjustImage()">
+                
+                <button onclick="autoAdjust()">Auto Adjust</button>
+                <button onclick="undoAdjust()">Undo</button>
+            </div>
+        
+            <div id="processed image">
+                <h2>处理后的图片</h2>
+                <img id="processed-image-10" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
+            </div>
     </div>
 
         <!-- 自定义拍照弹窗 -->
