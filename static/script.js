@@ -168,7 +168,29 @@ function openCameraDialog(pageNumber) {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('function_id', pageNumber);
+            // 对于图像分割功能，传递阈值
+            if (pageNumber === 2) {
+                const threshold = document.getElementById('threshold-value').value;
+                formData.append('threshold', threshold);
+            }
+            //对于证件照功能，传递背景颜色和照片尺寸
+            if (pageNumber === 3) {
+                const backgroundColor = document.getElementById('background-color-3').value;
+                const photoSize = document.getElementById('photo-size-3').value;
+                formData.append('background_color', backgroundColor);
+                formData.append('photo_size', photoSize);
+            }
 
+            //对于图像旋转功能,传递角度
+            if (pageNumber === 6) {
+                const angle = document.getElementById('angle-value').value;
+                formData.append('angle', angle);
+            }
+            //对于图像翻转功能,传递翻转方向
+            if (pageNumber === 7) {
+                const flipDirection = document.getElementById('flip-direction').value;
+                formData.append('flip_direction', flipDirection);
+            }
             fetch('/process_image', {
                 method: 'POST',
                 body: formData
