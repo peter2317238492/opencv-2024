@@ -312,11 +312,15 @@ function performCrop() {
         const url = URL.createObjectURL(blob);
         document.getElementById('processed-image-9').src = url;
         closeCropDialog();  // 关闭裁剪对话框
+        //显示裁剪后的图片
+        const processedImage = document.getElementById('processed-image-9');
+        processedImage.style.display = 'block';
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
+
 ////////
 
 function adjustImage() {
