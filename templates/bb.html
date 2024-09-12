@@ -245,14 +245,14 @@
             </div>
         </div>
 
-        
+
         <div id="sub-page-9" class="page" style="display: none;">
             <div class="upload-section">
                 <input type="file" id="upload-image-9" accept="image/*">
                 <button onclick="uploadImage(9)">上传图片</button>
                 <button onclick="openCameraDialog(9)">拍照</button>
                 <button onclick="downloadImage(9)">下载图片</button>
-                <button onclick="openCropDialog()">开始裁剪</button> <!-- 改为打开裁剪对话框 -->
+                <button onclick="openCropDialog()">开始裁剪</button> <!-- 打开裁剪对话框 -->
             </div>
             <div class="result-section">
                 <div class="image-container">
@@ -266,17 +266,18 @@
                     </div>
                 </div>
             </div>
-        
+
             <!-- 弹出裁剪框 -->
             <div id="crop-dialog" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid black; background: white; padding: 20px;">
                 <h3>选择裁剪区域</h3>
-                <img id="crop-image" style="max-width: 100%; height: auto;">
-                <div id="selection-box" class="selection-box" style="display:none;"></div>
+                <div style="position: relative;">
+                    <img id="crop-image" style="max-width: 100%; height: auto;">
+                    <div id="selection-box" class="selection-box" style="display:none;"></div>
+                </div>
                 <button onclick="performCrop()">裁剪</button>
                 <button onclick="closeCropDialog()">取消</button>
             </div>
         </div>
-
 
     </div>
 
