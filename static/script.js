@@ -286,21 +286,176 @@ function performCrop() {
     }
 
     fetch('/process_image', {
+
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {          
+        const url = URL.createObjectURL(blob);
+        document.getElementById('processed-image-9').src = url;
+        closeCropDialog();    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// 关闭裁剪对话框
+        
+
+
+function adjustImage() {
+    const contrast = document.getElementById('contrast-slider').value;
+    const brightness = document.getElementById('brightness-slider').value;
+    const gamma = document.getElementById('gamma-slider').value;
+
+    const formData = new FormData();
+    const fileInput = document.getElementById('upload-image-10');
+    const file = fileInput.files[0];
+    formData.append('image', file);
+    formData.append('contrast', contrast);
+    formData.append('brightness', brightness);
+    formData.append('gamma', gamma);
+
+    fetch('/adjust_image', {
         method: 'POST',
         body: formData
     })
     .then(response => response.blob())
     .then(blob => {
-        const url = URL.createObjectURL(blob);
-        document.getElementById('processed-image-9').src = url;
-        closeCropDialog();  // 关闭裁剪对话框
+        const imageUrl = URL.createObjectURL(blob);
+        const processedImageElement = document.getElementById('processed-image-10');
+        processedImageElement.src = imageUrl;
+
+        // Once the image is loaded, draw the histogram
+        processedImageElement.onload = function () {
+            drawHistogram(processedImageElement);
+        };
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
 
+function drawHistogram(imageElement) {
+    const canvas = document.getElementById('histogram');
+    const ctx = canvas.getContext('2d');
+    const image = new Image();
+    image.src = imageElement.src;
+
+    image.onload = function () {
+        // Draw the image on a hidden canvas to get pixel data
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = image.width;
+        tempCanvas.height = image.height;
+        tempCtx.drawImage(image, 0, 0);
+
+        // Get the image data
+        const imageData = tempCtx.getImageData(0, 0, image.width, image.height);
+        const data = imageData.data;
+
+        // Initialize histograms for red, green, and blue channels
+        const redHistogram = new Array(256).fill(0);
+        const greenHistogram = new Array(256).fill(0);
+        const blueHistogram = new Array(256).fill(0);
+
+        // Calculate histograms
+        for (let i = 0; i < data.length; i += 4) {
+            redHistogram[data[i]]++;
+            greenHistogram[data[i + 1]]++;
+            blueHistogram[data[i + 2]]++;
+        }
+
+        // Find the maximum value for normalization
+        const maxRed = Math.max(...redHistogram);
+        const maxGreen = Math.max(...greenHistogram);
+        const maxBlue = Math.max(...blueHistogram);
+        const max = Math.max(maxRed, maxGreen, maxBlue);
+
+        // Clear the canvas before drawing histograms
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Set bar width
+        const barWidth = 2;
+
+        // Draw the red, green, and blue histograms with transparency
+        for (let i = 0; i < 256; i++) {
+            const redHeight = (redHistogram[i] / max) * canvas.height;
+            const greenHeight = (greenHistogram[i] / max) * canvas.height;
+            const blueHeight = (blueHistogram[i] / max) * canvas.height;
+
+            // Red channel
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+            ctx.fillRect(i * barWidth, canvas.height - redHeight, barWidth, redHeight);
+
+            // Green channel
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
+            ctx.fillRect(i * barWidth, canvas.height - greenHeight, barWidth, greenHeight);
+
+            // Blue channel
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
+            ctx.fillRect(i * barWidth, canvas.height - blueHeight, barWidth, blueHeight);
+        }
+
+        // Optionally add a border around the histogram
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    };
+}
 
 
 
 
+function autoAdjust() {
+    const fileInput = document.getElementById('upload-image-10');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("请先上传一张图片");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/auto_adjust', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const imageUrl = URL.createObjectURL(blob);
+        document.getElementById('processed-image-10').src = imageUrl;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function undoAdjust() {
+    const fileInput = document.getElementById('upload-image-10');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("请先上传一张图片");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('/undo_adjust', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const imageUrl = URL.createObjectURL(blob);
+        document.getElementById('processed-image-10').src = imageUrl;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}

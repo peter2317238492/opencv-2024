@@ -86,3 +86,11 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
+        #histogram {
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        
