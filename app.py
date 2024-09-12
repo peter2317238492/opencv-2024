@@ -794,7 +794,7 @@ def undo_adjust_route():
     #look for input_image_latest.jpg
     image = cv2.imread('input_image_latest.jpg')
     # Encode and return the auto-adjusted image
-    _, img_encoded = cv2.imencode('.png', final_image)
+    _, img_encoded = cv2.imencode('.png', image)
     return send_file(BytesIO(img_encoded), mimetype='image/png')
 
 if __name__ == '__main__':

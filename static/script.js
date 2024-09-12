@@ -203,6 +203,7 @@ function openCameraDialog(pageNumber) {
     // 初始化摄像头
     initCamera();
 }
+
 let startX, startY, endX, endY;
 let cropping = false;
 const uploadedImage = document.getElementById('uploaded-image-9');
@@ -225,8 +226,8 @@ function openCropDialog() {
         // 计算缩放比例
         const naturalWidth = cropImage.naturalWidth;
         const naturalHeight = cropImage.naturalHeight;
-        const displayWidth = cropImage.clientWidth;
-        const displayHeight = cropImage.clientHeight;
+        const displayWidth = cropImage.offsetWidth;
+        const displayHeight = cropImage.offsetHeight;
 
         scaleX = naturalWidth / displayWidth;
         scaleY = naturalHeight / displayHeight;
@@ -250,36 +251,57 @@ function startCrop() {
 
 function startSelection(event) {
     cropping = true;  // 标记为正在裁剪
-    const rect = cropImage.getBoundingClientRect();
-    startX = Math.max(0, event.clientX - rect.left);  // 防止超出边界
-    startY = Math.max(0, event.clientY - rect.top);
+    
+    // 获取图片相对于父容器的位置
+    const rectLeft = cropImage.offsetLeft;
+    const rectTop = cropImage.offsetTop;
+
+    // 获取鼠标点击位置相对于图片的坐标，限制不超出图片范围
+    startX = Math.max(0, event.pageX - rectLeft);  
+    startY = Math.max(0, event.pageY - rectTop);
 
     // 初始化裁剪框
     selectionBox.style.left = startX + 'px';
     selectionBox.style.top = startY + 'px';
     selectionBox.style.width = '0px';
     selectionBox.style.height = '0px';
-    selectionBox.style.display = 'block';
+    selectionBox.style.display = 'block';  // 确保框在鼠标按下时立即显示
 }
 
 function resizeSelection(event) {
     if (!cropping) return;  // 如果未按下鼠标，则不进行裁剪
-    
-    const rect = cropImage.getBoundingClientRect();
-    endX = Math.min(Math.max(0, event.clientX - rect.left), rect.width);  // 限制裁剪范围不超出图片边界
-    endY = Math.min(Math.max(0, event.clientY - rect.top), rect.height);
 
-    // 更新裁剪框大小和位置
+    const rectLeft = cropImage.offsetLeft;
+    const rectTop = cropImage.offsetTop;
+    const imageWidth = cropImage.offsetWidth;
+    const imageHeight = cropImage.offsetHeight;
+    
+    // 计算鼠标拖动的位置，确保不超出图片的边界
+    endX = Math.min(Math.max(0, event.pageX - rectLeft), imageWidth);  
+    endY = Math.min(Math.max(0, event.pageY - rectTop), imageHeight);
+
+    // 更新裁剪框的大小和位置
     selectionBox.style.width = Math.abs(endX - startX) + 'px';
     selectionBox.style.height = Math.abs(endY - startY) + 'px';
     selectionBox.style.left = Math.min(startX, endX) + 'px';
     selectionBox.style.top = Math.min(startY, endY) + 'px';
+
+    selectionBox.style.display = 'block';  // 在鼠标移动时，确保框保持可见
 }
 
 function endSelection() {
     cropping = false;  // 结束裁剪
     document.removeEventListener('mousemove', resizeSelection);
     document.removeEventListener('mouseup', endSelection);
+
+    // 在鼠标释放后，保持红色框可见，直到关闭裁剪对话框
+    selectionBox.style.display = 'block';
+}
+
+function closeCropDialog() {
+    // 关闭裁剪对话框时隐藏红色框
+    cropDialog.style.display = 'none';
+    selectionBox.style.display = 'none';
 }
 
 function performCrop() {
@@ -320,7 +342,6 @@ function performCrop() {
         console.error('Error:', error);
     });
 }
-
 
 function adjustImage() {
     const contrast = document.getElementById('contrast-slider').value;
