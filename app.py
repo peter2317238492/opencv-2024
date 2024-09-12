@@ -718,18 +718,19 @@ def process_image():
             return send_file(BytesIO(img_encoded), mimetype='image/png')
         else:
             return "Invalid crop coordinates", 400
-
-
-
-def adjust_image(image, contrast=1.0, brightness=0, gamma=1.0):
-    # Adjust contrast and brightness
-    adjusted = cv2.convertScaleAbs(image, alpha=contrast, beta=brightness)
     
-    # Apply gamma correction
-    gamma_correction = np.array([((i / 255.0) ** (1.0 / gamma)) * 255 for i in np.arange(0, 256)]).astype("uint8")
-    final_image = cv2.LUT(adjusted, gamma_correction)
-    
-    return final_image
+    def adjust_image(image, contrast=1.0, brightness=0, gamma=1.0):
+        # Adjust contrast and brightness
+        adjusted = cv2.convertScaleAbs(image, alpha=contrast, beta=brightness)
+        
+        # Apply gamma correction
+        gamma_correction = np.array([((i / 255.0) ** (1.0 / gamma)) * 255 for i in np.arange(0, 256)]).astype("uint8")
+        final_image = cv2.LUT(adjusted, gamma_correction)
+        
+        return final_image
+
+
+
 
 @app.route('/adjust_image', methods=['POST'])
 def adjust_image_route():
@@ -738,15 +739,15 @@ def adjust_image_route():
     contrast = float(request.form.get('contrast', 1.0))
     brightness = int(request.form.get('brightness', 0))
     gamma = float(request.form.get('gamma', 1.0))
-    #save the latest changed image
-    cv2.imwrite('input_image_latest.jpg', image)
+
     
     # Read image
     in_memory_file = BytesIO()
     file.save(in_memory_file)
     data = np.frombuffer(in_memory_file.getvalue(), dtype=np.uint8)
     image = cv2.imdecode(data, cv2.IMREAD_COLOR)
-    
+    #save the latest changed image
+    cv2.imwrite('input_image_latest.jpg', image)
     # Apply adjustments
     adjusted_image = adjust_image(image, contrast, brightness, gamma)
     
@@ -791,7 +792,7 @@ def auto_adjust_route():
 @app.route('/undo_adjust', methods=['POST'])
 def undo_adjust_route():
     #look for input_image_latest.jpg
-    
+    image = cv2.imread('input_image_latest.jpg')
     # Encode and return the auto-adjusted image
     _, img_encoded = cv2.imencode('.png', final_image)
     return send_file(BytesIO(img_encoded), mimetype='image/png')
