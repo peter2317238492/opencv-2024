@@ -227,6 +227,7 @@ function openCameraDialog(pageNumber) {
 }
 
 let startX, startY, endX, endY;
+startX,startY,endX,endY = 0;
 let cropping = false;
 const uploadedImage = document.getElementById('uploaded-image-9');
 const cropDialog = document.getElementById('crop-dialog');
@@ -266,8 +267,8 @@ function closeCropDialog() {
 function startCrop() {
     selectionBox.style.display = 'none';  // 重置裁剪框
     
-    cropImage.addEventListener('mousedown', startSelection);
-    document.addEventListener('mousemove', resizeSelection);
+    cropImage.addEventListener('click', startSelection,{ once: true });
+    document.addEventListener('click', resizeSelection);
     document.addEventListener('mouseup', endSelection);
 }
 
@@ -283,6 +284,9 @@ function startSelection(event) {
     selectionBox.style.width = '0px';
     selectionBox.style.height = '0px';
     selectionBox.style.display = 'block';
+    console.log('Start X:', startX, 'Start Y:', startY);
+    console.log('End X:', endX, 'End Y:', endY);
+
 }
 
 function resizeSelection(event) {
@@ -297,6 +301,9 @@ function resizeSelection(event) {
     selectionBox.style.height = Math.abs(endY - startY) + 'px';
     selectionBox.style.left = Math.min(startX, endX) + 'px';
     selectionBox.style.top = Math.min(startY, endY) + 'px';
+    console.log('Start X:', startX, 'Start Y:', startY);
+    console.log('End X:', endX, 'End Y:', endY);
+
 }
 
 function endSelection() {
@@ -307,6 +314,11 @@ function endSelection() {
 }
 
 function performCrop() {
+    if (isNaN(startX) || isNaN(startY) || isNaN(endX) || isNaN(endY)) {
+        alert('裁剪坐标无效，请重新选择裁剪区域！');
+        return;
+    }
+
     // 获取裁剪坐标并转换为原始图像坐标
     const x_start = Math.min(startX, endX) * scaleX;
     const y_start = Math.min(startY, endY) * scaleY;
