@@ -703,10 +703,10 @@ def process_image():
 
     if function_id == 9:  # 图像裁剪功能
         # 获取表单中鼠标点击的坐标
-        x_start = int(request.form['x_start'])
-        y_start = int(request.form['y_start'])
-        x_end = int(request.form['x_end'])
-        y_end = int(request.form['y_end'])
+        x_start = int(float(request.form['x_start']))
+        y_start = int(float(request.form['y_start']))
+        x_end = int(float(request.form['x_end']))
+        y_end = int(float(request.form['y_end']))
 
         # 检查裁剪坐标是否有效
         if x_start < x_end and y_start < y_end:
@@ -718,7 +718,6 @@ def process_image():
             return send_file(BytesIO(img_encoded), mimetype='image/png')
         else:
             return "Invalid crop coordinates", 400
-            
 
 
 

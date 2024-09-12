@@ -86,6 +86,12 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
+        #selection-box {
+            border: 2px dashed red;  /* 显示裁剪框为红色虚线框 */
+            position: absolute;      /* 确保裁剪框在图片上绝对定位 */
+            pointer-events: none;    /* 避免裁剪框本身接收鼠标事件 */
+        }
+        
         #histogram {
             border: 1px solid #ddd;
             margin-top: 10px;

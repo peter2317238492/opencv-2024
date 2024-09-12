@@ -210,9 +210,9 @@ const uploadedImage = document.getElementById('uploaded-image-9');
 const cropDialog = document.getElementById('crop-dialog');
 const cropImage = document.getElementById('crop-image');
 const selectionBox = document.getElementById('selection-box');
+let scaleX, scaleY;  // 用于计算实际的图像缩放比例
 
 function openCropDialog() {
-    // 在点击 "开始裁剪" 后显示裁剪对话框
     const imageSrc = uploadedImage.src;
     if (!imageSrc) {
         alert('请先上传图片！');
@@ -221,30 +221,41 @@ function openCropDialog() {
     
     cropImage.src = imageSrc;  // 使用上传的图片作为裁剪对象
     cropDialog.style.display = 'block';  // 显示裁剪弹出框
-    startCrop();  // 开始裁剪逻辑
+    
+    cropImage.onload = () => {
+        // 计算缩放比例
+        const naturalWidth = cropImage.naturalWidth;
+        const naturalHeight = cropImage.naturalHeight;
+        const displayWidth = cropImage.clientWidth;
+        const displayHeight = cropImage.clientHeight;
+
+        scaleX = naturalWidth / displayWidth;
+        scaleY = naturalHeight / displayHeight;
+
+        // 开始裁剪逻辑
+        startCrop(); 
+    };
 }
 
 function closeCropDialog() {
-    // 关闭裁剪对话框
     cropDialog.style.display = 'none';
 }
 
 function startCrop() {
-    // 重置裁剪框
-    selectionBox.style.display = 'none';
+    selectionBox.style.display = 'none';  // 重置裁剪框
     
-    // 为裁剪图片绑定鼠标事件
     cropImage.addEventListener('mousedown', startSelection);
-    cropImage.addEventListener('mousemove', resizeSelection);
-    cropImage.addEventListener('mouseup', endSelection);
+    document.addEventListener('mousemove', resizeSelection);
+    document.addEventListener('mouseup', endSelection);
 }
 
 function startSelection(event) {
-    cropping = true;
+    cropping = true;  // 标记为正在裁剪
     const rect = cropImage.getBoundingClientRect();
-    startX = event.clientX - rect.left;
-    startY = event.clientY - rect.top;
+    startX = Math.max(0, event.clientX - rect.left);  // 防止超出边界
+    startY = Math.max(0, event.clientY - rect.top);
 
+    // 初始化裁剪框
     selectionBox.style.left = startX + 'px';
     selectionBox.style.top = startY + 'px';
     selectionBox.style.width = '0px';
@@ -253,11 +264,13 @@ function startSelection(event) {
 }
 
 function resizeSelection(event) {
-    if (!cropping) return;
+    if (!cropping) return;  // 如果未按下鼠标，则不进行裁剪
+    
     const rect = cropImage.getBoundingClientRect();
-    endX = event.clientX - rect.left;
-    endY = event.clientY - rect.top;
+    endX = Math.min(Math.max(0, event.clientX - rect.left), rect.width);  // 限制裁剪范围不超出图片边界
+    endY = Math.min(Math.max(0, event.clientY - rect.top), rect.height);
 
+    // 更新裁剪框大小和位置
     selectionBox.style.width = Math.abs(endX - startX) + 'px';
     selectionBox.style.height = Math.abs(endY - startY) + 'px';
     selectionBox.style.left = Math.min(startX, endX) + 'px';
@@ -265,20 +278,29 @@ function resizeSelection(event) {
 }
 
 function endSelection() {
-    cropping = false;
-    // 停止监听鼠标事件
-    cropImage.removeEventListener('mousemove', resizeSelection);
-    cropImage.removeEventListener('mouseup', endSelection);
+    cropping = false;  // 结束裁剪
+    document.removeEventListener('mousemove', resizeSelection);
+    document.removeEventListener('mouseup', endSelection);
 }
 
 function performCrop() {
-    // 获取裁剪坐标并提交裁剪请求
+    if (!startX || !startY || !endX || !endY) {
+        alert('请先选择裁剪区域！');
+        return;
+    }
+
+    // 获取裁剪坐标并转换为原始图像坐标
+    const x_start = Math.min(startX, endX) * scaleX;
+    const y_start = Math.min(startY, endY) * scaleY;
+    const x_end = Math.max(startX, endX) * scaleX;
+    const y_end = Math.max(startY, endY) * scaleY;
+
     const formData = new FormData();
     formData.append('function_id', '9');
-    formData.append('x_start', Math.min(startX, endX));
-    formData.append('y_start', Math.min(startY, endY));
-    formData.append('x_end', Math.max(startX, endX));
-    formData.append('y_end', Math.max(startY, endY));
+    formData.append('x_start', x_start);
+    formData.append('y_start', y_start);
+    formData.append('x_end', x_end);
+    formData.append('y_end', y_end);
 
     const imageFile = document.getElementById('upload-image-9').files[0];
     if (imageFile) {
