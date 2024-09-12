@@ -122,3 +122,84 @@ function uploadImagesForBackgroundReplacement(pageNumber) {
         console.error('错误:', error);
     });
 }
+// Function to open the camera dialog when "拍照" is pressed
+function openCameraDialog(pageNumber) {
+    const modal = document.getElementById('cameraModal');  // 获取自定义弹窗
+    const modalVideo = document.getElementById('modalVideo');  // 获取video元素
+    const takePhotoButton = document.getElementById('takePhotoButton');  // 获取拍照按钮
+    const closeModalButton = document.getElementById('closeModal');  // 获取关闭按钮
+    const uploadedImage = document.getElementById(`uploaded-image-${pageNumber}`);  // 获取展示拍摄图片的位置
+    const cancelPhotoButton = document.getElementById('cancelPhotoButton');  // 获取取消按钮
+    let stream;  // 用于保存摄像头流
+
+    // 摄像头流设置
+    const constraints = {
+        video: {
+            width: 640,
+            height: 480
+        }
+    };
+
+    // 打开弹窗并初始化摄像头
+    async function initCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia(constraints);  // 请求访问摄像头
+            modalVideo.srcObject = stream;  // 将摄像头流赋给video元素
+            modal.style.display = 'block';  // 显示弹窗
+        } catch (e) {
+            console.error('Error accessing camera:', e);
+        }
+    }
+
+    // 拍照并显示图片
+    takePhotoButton.onclick = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const context = canvas.getContext('2d');
+        context.drawImage(modalVideo, 0, 0, canvas.width, canvas.height);  // 将视频流绘制到画布上
+        const imageDataURL = canvas.toDataURL('image/jpeg');  // 获取图片的base64数据
+        uploadedImage.src = imageDataURL;  // 显示拍摄的图片
+        uploadedImage.style.display = 'block';
+
+        //将canvas转换为图片文件
+        canvas.toBlob(function (blob) {
+            const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('function_id', pageNumber);
+
+            fetch('/process_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                document.getElementById(`processed-image-${pageNumber}`).src = imageUrl;
+            })
+            .catch(error => {
+                console.error('上传错误:', error);
+            });
+        });
+
+        // 关闭弹窗并停止摄像头
+        closeModal();
+    };
+
+    // 关闭弹窗并停止摄像头流
+    function closeModal() {
+        modal.style.display = 'none';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());  // 停止摄像头流
+        }
+    }
+
+    // 点击关闭按钮时关闭弹窗
+    closeModalButton.onclick = closeModal;
+
+    cancelPhotoButton.onclick = closeModal;
+
+    // 初始化摄像头
+    initCamera();
+}

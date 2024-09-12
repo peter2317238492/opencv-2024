@@ -78,3 +78,11 @@
             margin-top: 10px;
         } /* 图片样式 */
 
+        dialog {
+            display: block;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
