@@ -597,6 +597,7 @@ def process_image():
                 M[1, 2] += (new_h / 2) - center[1]
                 rotated_image = cv2.warpAffine(image, M, (new_w, new_h))
             _, img_encoded = cv2.imencode('.png', rotated_image)
+            return send_file(BytesIO(img_encoded), mimetype='image/png')
         else:
             # 任意角度旋转
             # 旋转图像
@@ -619,6 +620,7 @@ def process_image():
             rotated_image = cv2.warpAffine(image, M, (new_w, new_h))
 
             _, img_encoded = cv2.imencode('.png', rotated_image)
+            return send_file(BytesIO(img_encoded), mimetype='image/png')
     if function_id == 7:  # 图片翻转
         flip_direction = request.form.get('flip_direction')
         if flip_direction == 'horizontal':
