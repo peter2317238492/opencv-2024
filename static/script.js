@@ -203,7 +203,6 @@ function openCameraDialog(pageNumber) {
     // 初始化摄像头
     initCamera();
 }
-//////////
 let startX, startY, endX, endY;
 let cropping = false;
 const uploadedImage = document.getElementById('uploaded-image-9');
@@ -308,22 +307,19 @@ function performCrop() {
     }
 
     fetch('/process_image', {
-
         method: 'POST',
         body: formData
     })
     .then(response => response.blob())
-    .then(blob => {          
+    .then(blob => {
         const url = URL.createObjectURL(blob);
         document.getElementById('processed-image-9').src = url;
-        closeCropDialog();    })
+        closeCropDialog();  // 关闭裁剪对话框
+    })
     .catch(error => {
         console.error('Error:', error);
     });
 }
-
-// 关闭裁剪对话框
-        
 
 
 function adjustImage() {
