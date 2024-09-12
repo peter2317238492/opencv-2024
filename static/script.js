@@ -203,3 +203,76 @@ function openCameraDialog(pageNumber) {
     // 初始化摄像头
     initCamera();
 }
+//////////
+let startX, startY, endX, endY;
+let cropping = false;
+const uploadedImage = document.getElementById('uploaded-image-9');
+const selectionBox = document.getElementById('selection-box');
+
+function startCrop() {
+    // 开始裁剪，绑定鼠标事件
+    uploadedImage.addEventListener('mousedown', startSelection);
+    uploadedImage.addEventListener('mousemove', resizeSelection);
+    uploadedImage.addEventListener('mouseup', endSelection);
+}
+
+function startSelection(event) {
+    cropping = true;
+    startX = event.offsetX;
+    startY = event.offsetY;
+    selectionBox.style.left = startX + 'px';
+    selectionBox.style.top = startY + 'px';
+    selectionBox.style.width = '0px';
+    selectionBox.style.height = '0px';
+    selectionBox.style.display = 'block';
+}
+
+function resizeSelection(event) {
+    if (!cropping) return;
+    endX = event.offsetX;
+    endY = event.offsetY;
+    selectionBox.style.width = Math.abs(endX - startX) + 'px';
+    selectionBox.style.height = Math.abs(endY - startY) + 'px';
+    selectionBox.style.left = Math.min(startX, endX) + 'px';
+    selectionBox.style.top = Math.min(startY, endY) + 'px';
+}
+
+function endSelection() {
+    cropping = false;
+    // 裁剪区域确定，发送裁剪请求
+    submitCropCoordinates(startX, startY, endX, endY);
+}
+
+function submitCropCoordinates(x_start, y_start, x_end, y_end) {
+    const formData = new FormData();
+    formData.append('function_id', '9');
+    formData.append('x_start', Math.min(x_start, x_end));
+    formData.append('y_start', Math.min(y_start, y_end));
+    formData.append('x_end', Math.max(x_start, x_end));
+    formData.append('y_end', Math.max(y_start, y_end));
+    
+    // 如果已经上传了图片，可以发送图片文件信息
+    const imageFile = document.getElementById('upload-image-9').files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+
+    // 发送Ajax请求到后端处理
+    fetch('/process_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        document.getElementById('processed-image-9').src = url;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
+
+
+

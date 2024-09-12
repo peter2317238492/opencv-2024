@@ -1,5 +1,8 @@
+import base64
+import re
 from flask import Flask, render_template, request, send_file
 import cv2
+import imagesize
 import numpy as np
 import dlib
 import os
@@ -12,6 +15,11 @@ from PIL import Image, ImageTk
 import cv2
 import numpy as np
 from threading import Thread
+
+from scipy import io
+
+
+
 
 class ImageMosaicEditor: #打码编辑器
     def __init__(self, root):
@@ -244,9 +252,11 @@ def Convert_ani(img, scale,session):
 app = Flask(__name__)
 
 
+
 @app.route('/')
 def index():
     return render_template('bb.html')
+
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
@@ -566,12 +576,7 @@ def process_image():
         #删除图片
         os.remove('input_image.jpg')
         return send_file(BytesIO(img_encoded), mimetype='image/png') 
-        # 显示结果
-        cv2.imshow("Anime Style Image", anime_img)
-        cv2.imwrite("output_anime_image.jpg", anime_img)
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
 
     if function_id == 6: #图片旋转
@@ -698,6 +703,29 @@ def process_image():
         
         _, img_encoded = cv2.imencode('.png', dst)
         return send_file(BytesIO(img_encoded), mimetype='image/png')
+    
+    #图像裁剪
+
+    if function_id == 9:  # 图像裁剪功能
+        # 获取表单中鼠标点击的坐标
+        x_start = int(request.form['x_start'])
+        y_start = int(request.form['y_start'])
+        x_end = int(request.form['x_end'])
+        y_end = int(request.form['y_end'])
+
+        # 检查裁剪坐标是否有效
+        if x_start < x_end and y_start < y_end:
+            # 裁剪图像
+            cropped_image = image[y_start:y_end, x_start:x_end]
+
+            # 编码裁剪后的图像并返回
+            _, img_encoded = cv2.imencode('.png', cropped_image)
+            return send_file(BytesIO(img_encoded), mimetype='image/png')
+        else:
+            return "Invalid crop coordinates", 400
+            
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
