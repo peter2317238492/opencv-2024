@@ -718,19 +718,19 @@ def process_image():
             return send_file(BytesIO(img_encoded), mimetype='image/png')
         else:
             return "Invalid crop coordinates", 400
+
+
+
     
-    def adjust_image(image, contrast=1.0, brightness=0, gamma=1.0):
-        # Adjust contrast and brightness
-        adjusted = cv2.convertScaleAbs(image, alpha=contrast, beta=brightness)
-        
-        # Apply gamma correction
-        gamma_correction = np.array([((i / 255.0) ** (1.0 / gamma)) * 255 for i in np.arange(0, 256)]).astype("uint8")
-        final_image = cv2.LUT(adjusted, gamma_correction)
-        
-        return final_image
+def adjust_image(image, contrast=1.0, brightness=0, gamma=1.0):
+    # Adjust contrast and brightness
+    adjusted = cv2.convertScaleAbs(image, alpha=contrast, beta=brightness)
 
+    # Apply gamma correction
+    gamma_correction = np.array([((i / 255.0) ** (1.0 / gamma)) * 255 for i in np.arange(0, 256)]).astype("uint8")
+    final_image = cv2.LUT(adjusted, gamma_correction)
 
-
+    return final_image
 
 @app.route('/adjust_image', methods=['POST'])
 def adjust_image_route():
