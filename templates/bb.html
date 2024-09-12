@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+        #main-page
+        {
+            display: block;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCV Image Processing System</title>
@@ -25,22 +31,10 @@
         
         <!-- 主页面内容 -->
         <div id="main-page" class="page">
-            <div class="upload-section">
-                <input type="file" id="upload-image" accept="image/*">
-                <button onclick="uploadImage(1)">上传图片</button>
-            </div>
-            <div class="result-section">
-                <div class="image-container">
-                    <div>
-                        <h2>用户上传的图片</h2>
-                        <img id="uploaded-image" src="" alt="Uploaded Image" style="display:none; max-width: 100%; height: auto;">
-                    </div>
-                    <div>
-                        <h2>处理后的图片</h2>
-                        <img id="processed-image" src="" alt="Processed Image" style="max-width: 100%; height: auto;">
-                    </div>
-                </div>
-            </div>
+            <h1>OpenCV 图像处理系统</h1>
+            <p>欢迎使用 OpenCV 图像处理系统。请从上方的工具栏中选择一个功能。</p>
+            <p>您可以上传图片，或者使用摄像头拍照。</p>
+            <p>点击上方的按钮，开始使用吧！</p>
         </div>
 
         <!-- 次页面1 - 区域打码 -->

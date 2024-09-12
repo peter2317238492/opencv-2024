@@ -1,102 +1,106 @@
-        body {
-            font-family: Arial, sans-serif;  /* 使用 Arial 字体 */
-            background-color: #f4f4f4;    /* 背景色 */
-            margin: 0; /* 去除默认的外边距 */
-            padding: 20px; /* 为了让内容不紧贴在边缘，添加内边距 */
-            display: flex; /* 使用 Flex 布局 */
-            justify-content: center; /* 水平居中 */
-            align-items: center;    /* 垂直居中 */
-            height: 100vh;  /* 100% 的视口高度 */
-        } /* 全局样式 */
+body {
+    font-family: Arial, sans-serif;  /* 使用 Arial 字体 */
+    background-color: #f4f4f4;    /* 背景色 */
+    margin: 0; /* 去除默认的外边距 */
+    padding: 20px; /* 为了让内容不紧贴在边缘，添加内边距 */
+    display: flex; /* 使用 Flex 布局 */
+    justify-content: center; /* 水平居中 */
+    align-items: center;    /* 垂直居中 */
+    height: 100vh;  /* 100% 的视口高度 */
+    background-image: url("/static/background.png");
+    background-size: cover;  /* 背景图片全屏覆盖 */
+    background-position: center;  /* 背景居中 */
+    background-repeat: no-repeat;  /* 背景图片不重复 */
+    background-color: transparent;  /* 确保背景是透明的 */
+} /* 全局样式 */
 
-        .container {
-            width: 80%;     /* 宽度 80% */
-            max-width: 800px;  /* 最大宽度 800px */
-            background-color: white;   /* 白色背景 */
-            padding: 20px;  /* 内边距 20px */
-            border-radius: 8px;   /* 圆角 8px */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-            text-align: center; /* 文本居中 */
-            margin-top: 60px; /* 上移白色区域 */
-        } /* 容器样式 */
+.container {
+    width: 80%;     /* 宽度 80% */
+    max-width: 800px;  /* 最大宽度 800px */
+    background-color: white;   /* 白色背景 */
+    padding: 20px;  /* 内边距 20px */
+    border-radius: 8px;   /* 圆角 8px */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+    text-align: center; /* 文本居中 */
+    margin-top: 60px; /* 上移白色区域 */
+} /* 容器样式 */
 
-        .toolbar {
-            margin-bottom: 20px;  /* 底部外边距 20px */
-            text-align: center;  /* 文本居中 */
-            position: absolute;  /* 绝对定位 */
-            top: 0; /* 顶部 0 */
-            left: 50%; /* 左侧 50% */
-            transform: translateX(-50%);  /* 水平居中 */
-            background-color: #007bff;  /* 蓝色背景 */
-            border-radius: 5px;  /* 圆角 5px */
-            padding: 10px;  /* 内边距 10px */
-            width: 100%;  /* 宽度 100% */
-        }  /* 工具栏样式 */
+.toolbar {
+    margin-bottom: 20px;  /* 底部外边距 20px */
+    text-align: center;  /* 文本居中 */
+    position: absolute;  /* 绝对定位 */
+    top: 0; /* 顶部 0 */
+    left: 50%; /* 左侧 50% */
+    transform: translateX(-50%);  /* 水平居中 */
+    background-color: #007bff;  /* 蓝色背景 */
+    border-radius: 5px;  /* 圆角 5px */
+    padding: 10px;  /* 内边距 10px */
+    width: 100%;  /* 宽度 100% */
+}  /* 工具栏样式 */
 
-        .toolbar button {
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
-        }
+.toolbar button {
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+}
 
-        .toolbar button.active {
-            background-color: #0056b3;
-        }
+.toolbar button.active {
+    background-color: #0056b3;
+}
 
-        .page {
-            display: none;
-        } /* 页面隐藏 */
+.page {
+    display: none;
+} /* 页面隐藏 */
 
-        .upload-section {
-            margin-bottom: 20px;
-        } /* 上传区域外边距 */
+.upload-section {
+    margin-bottom: 20px;
+} /* 上传区域外边距 */
 
-        .result-section {
-            margin-top: 20px;
-        } /* 结果区域外边距 */
+.result-section {
+    margin-top: 20px;
+} /* 结果区域外边距 */
 
-        .image-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        } /* 图片容器样式 */
+.image-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+} /* 图片容器样式 */
 
-        .image-container div {
-            width: 48%;
-        } /* 图片容器内部样式 */
+.image-container div {
+    width: 48%;
+} /* 图片容器内部样式 */
 
-        #uploaded-image, #processed-image {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-top: 10px;
-        } /* 图片样式 */
+#uploaded-image, #processed-image {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 10px;
+} /* 图片样式 */
 
-        dialog {
-            display: block;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        
-        #selection-box {
-            border: 2px dashed red;  /* 显示裁剪框为红色虚线框 */
-            position: absolute;      /* 确保裁剪框在图片上绝对定位 */
-            pointer-events: none;    /* 避免裁剪框本身接收鼠标事件 */
-        }
-        
-        #histogram {
-            border: 1px solid #ddd;
-            margin-top: 10px;
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        
+dialog {
+    display: block;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#selection-box {
+    border: 2px dashed red;  /* 显示裁剪框为红色虚线框 */
+    position: absolute;      /* 确保裁剪框在图片上绝对定位 */
+    pointer-events: none;    /* 避免裁剪框本身接收鼠标事件 */
+}
+
+#histogram {
+    border: 1px solid #ddd;
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    height: auto;
+}
