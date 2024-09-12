@@ -207,19 +207,44 @@ function openCameraDialog(pageNumber) {
 let startX, startY, endX, endY;
 let cropping = false;
 const uploadedImage = document.getElementById('uploaded-image-9');
+const cropDialog = document.getElementById('crop-dialog');
+const cropImage = document.getElementById('crop-image');
 const selectionBox = document.getElementById('selection-box');
 
+function openCropDialog() {
+    // 在点击 "开始裁剪" 后显示裁剪对话框
+    const imageSrc = uploadedImage.src;
+    if (!imageSrc) {
+        alert('请先上传图片！');
+        return;
+    }
+    
+    cropImage.src = imageSrc;  // 使用上传的图片作为裁剪对象
+    cropDialog.style.display = 'block';  // 显示裁剪弹出框
+    startCrop();  // 开始裁剪逻辑
+}
+
+function closeCropDialog() {
+    // 关闭裁剪对话框
+    cropDialog.style.display = 'none';
+}
+
 function startCrop() {
-    // 开始裁剪，绑定鼠标事件
-    uploadedImage.addEventListener('mousedown', startSelection);
-    uploadedImage.addEventListener('mousemove', resizeSelection);
-    uploadedImage.addEventListener('mouseup', endSelection);
+    // 重置裁剪框
+    selectionBox.style.display = 'none';
+    
+    // 为裁剪图片绑定鼠标事件
+    cropImage.addEventListener('mousedown', startSelection);
+    cropImage.addEventListener('mousemove', resizeSelection);
+    cropImage.addEventListener('mouseup', endSelection);
 }
 
 function startSelection(event) {
     cropping = true;
-    startX = event.offsetX;
-    startY = event.offsetY;
+    const rect = cropImage.getBoundingClientRect();
+    startX = event.clientX - rect.left;
+    startY = event.clientY - rect.top;
+
     selectionBox.style.left = startX + 'px';
     selectionBox.style.top = startY + 'px';
     selectionBox.style.width = '0px';
@@ -229,8 +254,10 @@ function startSelection(event) {
 
 function resizeSelection(event) {
     if (!cropping) return;
-    endX = event.offsetX;
-    endY = event.offsetY;
+    const rect = cropImage.getBoundingClientRect();
+    endX = event.clientX - rect.left;
+    endY = event.clientY - rect.top;
+
     selectionBox.style.width = Math.abs(endX - startX) + 'px';
     selectionBox.style.height = Math.abs(endY - startY) + 'px';
     selectionBox.style.left = Math.min(startX, endX) + 'px';
@@ -239,25 +266,25 @@ function resizeSelection(event) {
 
 function endSelection() {
     cropping = false;
-    // 裁剪区域确定，发送裁剪请求
-    submitCropCoordinates(startX, startY, endX, endY);
+    // 停止监听鼠标事件
+    cropImage.removeEventListener('mousemove', resizeSelection);
+    cropImage.removeEventListener('mouseup', endSelection);
 }
 
-function submitCropCoordinates(x_start, y_start, x_end, y_end) {
+function performCrop() {
+    // 获取裁剪坐标并提交裁剪请求
     const formData = new FormData();
     formData.append('function_id', '9');
-    formData.append('x_start', Math.min(x_start, x_end));
-    formData.append('y_start', Math.min(y_start, y_end));
-    formData.append('x_end', Math.max(x_start, x_end));
-    formData.append('y_end', Math.max(y_start, y_end));
-    
-    // 如果已经上传了图片，可以发送图片文件信息
+    formData.append('x_start', Math.min(startX, endX));
+    formData.append('y_start', Math.min(startY, endY));
+    formData.append('x_end', Math.max(startX, endX));
+    formData.append('y_end', Math.max(startY, endY));
+
     const imageFile = document.getElementById('upload-image-9').files[0];
     if (imageFile) {
         formData.append('image', imageFile);
     }
 
-    // 发送Ajax请求到后端处理
     fetch('/process_image', {
         method: 'POST',
         body: formData
@@ -266,6 +293,7 @@ function submitCropCoordinates(x_start, y_start, x_end, y_end) {
     .then(blob => {
         const url = URL.createObjectURL(blob);
         document.getElementById('processed-image-9').src = url;
+        closeCropDialog();  // 关闭裁剪对话框
     })
     .catch(error => {
         console.error('Error:', error);
